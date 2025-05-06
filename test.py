@@ -9,7 +9,7 @@ if len(sys.argv) != 2:
 
 img_path = sys.argv[1]
 threshold_value = 50        # 閾值，過濾光暈用
-uniformity_threshold = 0.7  # 通過判定條件（最小值 / 最大值）
+
 
 # === 讀取圖片（模擬擷取影像）===
 image = cv2.imread(img_path)
@@ -33,10 +33,6 @@ if bright_pixels.size > 0:
 
     print(f"Min: {min_val}, Max: {max_val}, Uniformity: {uniformity * 100:.2f}%")
 
-    if uniformity >= uniformity_threshold:
-        print("✅ 合格：亮度勻度 OK")
-    else:
-        print("❌ 不合格：亮度不均勻")
 else:
     print("⚠️ 未偵測到亮點區域（請確認閾值是否正確）")
 
