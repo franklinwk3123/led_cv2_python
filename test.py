@@ -40,6 +40,9 @@ else:
 cv2.imshow("Original", image)
 cv2.imshow("Gray", gray)
 cv2.imshow("Threshold Mask", mask)
-cv2.waitKey(0)
+print("ℹ️ 在視窗區塊內按下 'q' 鍵以關閉所有視窗")
+while True:
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
 cv2.destroyAllWindows()
 
