@@ -1,9 +1,15 @@
 
 import cv2
+import os
 import numpy as np
 import pandas as pd
 import sys
 from math import atan2, pi
+from datetime import datetime
+
+# 建立本地端以日期命名的資料夾
+folder_name = datetime.now().strftime("led_result_%Y%m%d")
+os.makedirs(folder_name, exist_ok=True)
 
 def load_image_gray(path):
     image = cv2.imread(path)
