@@ -1,8 +1,13 @@
 import cv2
 import numpy as np
+import sys
 
 # === 設定參數 ===
-img_path = "test_ring.bmp"  # 替換成你的 bitmap 路徑
+if len(sys.argv) != 2:
+    print("⚠️ 使用方式: python test.py <圖片路徑>")
+    exit(1)
+
+img_path = sys.argv[1]
 threshold_value = 50        # 閾值，過濾光暈用
 uniformity_threshold = 0.7  # 通過判定條件（最小值 / 最大值）
 
