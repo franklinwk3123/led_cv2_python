@@ -7,10 +7,6 @@ import sys
 from math import atan2, pi
 from datetime import datetime
 
-# 建立本地端以日期命名的資料夾
-folder_name = datetime.now().strftime("led_result_%Y%m%d")
-os.makedirs(folder_name, exist_ok=True)
-
 def load_image_gray(path):
     image = cv2.imread(path)
     if image is None:
@@ -65,6 +61,9 @@ if __name__ == "__main__":
         exit(1)
 
     image_path = sys.argv[1]
+    # 建立本地端資料夾
+    folder_name = f"led_result_{os.path.splitext(os.path.basename(image_path))[0]}_{datetime.now().strftime('%Y%m%d')}"
+    os.makedirs(folder_name, exist_ok=True)
     image, gray = load_image_gray(image_path)
     mask = get_threshold_mask(gray)
     contour = get_largest_contour(mask)

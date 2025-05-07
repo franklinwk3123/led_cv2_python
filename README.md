@@ -10,7 +10,7 @@
 | 檔案名稱 | 說明 |
 |----------|------|
 | `led_uniformity_segmented_with_images.py` | 主程式，進行 LED 亮度分布分析 |
-| `led_result_YYYYMMDD/` | 執行時自動產生的分析資料夾（依照日期命名） |
+| `led_result_[檔案名稱]_YYYYMMDD/` | 執行時自動產生的分析資料夾（依照日期命名） |
 | `led_roi_brightness.csv` | 分析結果，包含 72 區段的平均亮度與統計 |
 
 ---
@@ -38,7 +38,7 @@ python led_uniformity_segmented_with_images.py path/to/your_led_image.png
 執行完成後，會在本機產生如下資料夾與內容：
 
 ```
-led_result_YYYYMMDD/
+led_result_[檔案名稱]_YYYYMMDD/
 ├── 01_gray_image.png               # 轉為灰階的原圖
 ├── 02_threshold_mask.png           # 自動 threshold 後的亮部遮罩
 ├── 03_contour_outline.png          # 找出的最大輪廓
