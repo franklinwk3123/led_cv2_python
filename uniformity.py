@@ -5,12 +5,7 @@ import numpy as np
 import pandas as pd
 import os
 from datetime import datetime
-from led_roi_utils import get_threshold_mask, \
-                            get_largest_contour, \
-                            get_ring_roi_from_contour, \
-                            segment_ring_roi, \
-                            save_process_images, \
-                            compute_uniformity
+import led_roi_utils as roi
 
 if len(sys.argv) != 2:
     print("Usage: python uniformity.py <image>")
@@ -19,20 +14,24 @@ if len(sys.argv) != 2:
 image_path = sys.argv[1]
 image = cv2.imread(image_path)
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-mask = get_threshold_mask(gray)
-contour = get_largest_contour(mask)
-roi_mask = get_ring_roi_from_contour(contour, gray.shape, thickness=10)
-brightness = segment_ring_roi(gray, roi_mask, num_segments=72)
-uniformity, std_dev, E_min, E_avg, E_max = compute_uniformity(brightness)
+mask = roi.get_threshold_mask(gray)
+contour = roi.get_largest_contour(mask)
+roi_mask = roi.get_ring_roi_from_contour(contour, gray.shape, thickness=10)
+brightness = roi.segment_ring_gray_roi(gray, roi_mask, num_segments=72)
 
 folder_name = f"led_result_{os.path.splitext(os.path.basename(image_path))[0]}_{datetime.now().strftime('%Y%m%d')}"
-save_process_images(image, gray, mask, contour, roi_mask, folder_name)
+roi.save_process_images(image, gray, mask, contour, roi_mask, folder_name)
 
+
+min_brightness = np.min(brightness)
+avg_brightness = np.mean(brightness)
+uniformity_ratio = min_brightness / avg_brightness if avg_brightness > 0 else 0
+pass_fail = "PASS" if uniformity_ratio >= 0.7 else "FAIL"
+print(f"Uniformity = {uniformity_ratio:.3f} → {pass_fail}")
 df = pd.DataFrame({"Segment": list(range(1, 73)), "Brightness": brightness})
-df.to_csv(f"{folder_name}/uniformity.csv", index=False)
 
-print(df)
-print(f"Uniformity (U₀): {uniformity:.4f}")
-print(f"Standard Deviation: {std_dev:.2f}")
+# 將判斷結果加入最後一列
+df.loc["Summary"] = [""] + [""] * (len(df.columns) - 2) + [pass_fail]
+df.to_csv(f"{folder_name}/uniformity.csv", index=False)
 
 print("Uniformity analysis done.")
