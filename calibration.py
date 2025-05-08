@@ -14,6 +14,7 @@ if len(sys.argv) != 3:
 golden_img = cv2.imread(sys.argv[1])
 dut_img = cv2.imread(sys.argv[2])
 
+assert golden_img.shape == dut_img.shape, "Golden 和 DUT 圖片必須具有相同解析度！"
 gray_golden = cv2.cvtColor(golden_img, cv2.COLOR_BGR2GRAY)
 mask = get_threshold_mask(gray_golden)
 contour = get_largest_contour(mask)
