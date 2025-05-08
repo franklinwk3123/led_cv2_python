@@ -4,7 +4,7 @@ import numpy as np
 from math import atan2, pi
 
 def get_threshold_mask(gray):
-    _, mask = cv2.threshold(gray, 250, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    _, mask = cv2.threshold(gray, 250, 255, cv2.THRESH_BINARY)
     return mask
 
 def get_largest_contour(mask):
