@@ -1,72 +1,114 @@
 
-# LED 環形均勻度分析工具
+# LED 環形亮度均勻度分析與校正工具
 
-這個工具是用來分析 LED 環形發光模組的亮度分布情況，透過影像處理判斷是否均勻發光，並產出分析報告與每個處理步驟的對應圖檔。
+這是一套針對 LED 環形光源的影像處理工具，提供兩大功能：
+
+1. **均勻度分析**：將環狀 LED 平均分為 72 個區段，計算每段亮度。
+2. **校正比對**：與 Golden 樣本 RGB 進行對比，產出每區段的 RGB 色差。
 
 ---
 
-## 📦 檔案說明
+## 📁 專案檔案說明
 
 | 檔案名稱 | 說明 |
 |----------|------|
-| `led_uniformity_segmented_with_images.py` | 主程式，進行 LED 亮度分布分析 |
-| `led_result_[檔案名稱]_YYYYMMDD/` | 執行時自動產生的分析資料夾（依照日期命名） |
-| `led_roi_brightness.csv` | 分析結果，包含 72 區段的平均亮度與統計 |
+| `led_roi_utils.py`               | 共用函式庫：ROI 擷取、分段分析、影像儲存 |
+| `uniformity.py`                 | 均勻度分析主程式，輸出 72 區段亮度與圖像 |
+| `calibration.py`                | 與 Golden 圖片比對的校正工具（RGB 差異） |
 
 ---
 
-## ▶️ 使用方式
-
-### 1. 安裝必要套件：
+## ▶️ 安裝套件
 
 ```bash
 pip install opencv-python numpy pandas
 ```
 
-### 2. 執行程式：
+---
+
+## ✅ 使用方式
+
+### 1. 進行亮度均勻度分析
 
 ```bash
-python led_uniformity_segmented_with_images.py path/to/your_led_image.png
+python uniformity.py path/to/your_led_image.png
 ```
 
-請將 `path/to/your_led_image.png` 換成你的圖片路徑。
+### 2. 執行 LED 校正與差異分析
 
----
-
-## 📂 執行輸出說明
-
-執行完成後，會在本機產生如下資料夾與內容：
-
-```
-led_result_[檔案名稱]_YYYYMMDD/
-├── 01_gray_image.png               # 轉為灰階的原圖
-├── 02_threshold_mask.png           # 自動 threshold 後的亮部遮罩
-├── 03_contour_outline.png          # 找出的最大輪廓
-├── 04_ring_roi_mask.png            # 環狀 ROI 遮罩
-├── 05_overlay_roi_on_image.png     # 原圖疊加 ROI 區域
-├── 06_overlay_72_segments.png      # 疊加 72 區段分割線
-├── led_roi_brightness.csv          # 各角度平均亮度資料表
+```bash
+python calibration.py path/to/golden_image.png path/to/dut_image.png
 ```
 
 ---
 
-## 📊 分析輸出
+## 📂 分析與圖像輸出
 
-終端機會輸出每段亮度資料與下列統計指標：
+每次執行會產生：
 
-- `Uniformity (U₀)`：E_min / E_avg
-- `Standard Deviation`
-- `Min / Avg / Max` 亮度
+```
+led_result_[圖片檔名]_YYYYMMDD/
+├── 01_gray_image.png               # 原圖轉灰階
+├── 02_threshold_mask.png           # Otsu 門檻後的遮罩
+├── 03_contour_outline.png          # 擷取輪廓
+├── 04_ring_roi_mask.png            # 內縮後的環狀 ROI
+├── 05_overlay_roi_on_image.png     # 疊圖結果
+├── uniformity.csv                  # 均勻度分析結果（若使用 uniformity.py）
+├── calib_R.csv / G.csv / B.csv     # 各通道色差結果（若使用 calibration.py）
+```
 
 ---
 
-## 🛠️ 調整參數
+## 📈 統計指標
 
-- **ROI 厚度** 可修改程式中 `get_ring_roi_from_contour()` 呼叫的 `thickness=100`
-- **區段數量** 預設為 72，可改 `segment_ring_roi(gray, roi_mask, num_segments=72)`
+- 每段亮度（灰階平均）
+- Uniformity \(U₀ = E_{min} / E_{avg}\)
+- 每段 RGB 差異（DUT - Golden）
 
 ---
 
-## 📩 作者建議
+## ⚙️ 可調參數
 
-此工具適用於具明顯環狀 LED 結構的影像，如需處理多圈、非中心對稱圖像，請聯絡作者以擴充功能。
+| 參數 | 說明 |
+|------|------|
+| `thickness` | ROI 厚度（預設為 10） |
+| `num_segments` | 分區數量，預設為 72 |
+
+可於主程式或 `led_roi_utils.py` 中調整。
+
+---
+
+## 🧠 延伸應用建議
+
+- 可結合相機 SDK（如 pypylon）即時擷取影像分析
+- 可搭配 LUT 或 EEPROM 進行動態 LED 校正
+
+
+---
+
+## 📷 實時擷取支援：Basler pypylon
+
+若您使用 Basler 工業相機進行實時 LED 擷取與分析，請先安裝：
+
+```bash
+pip install pypylon
+```
+
+使用範例架構：
+
+```python
+from pypylon import pylon
+camera = pylon.InstantCamera(pylon.TlFactory.GetInstance().CreateFirstDevice())
+camera.Open()
+camera.StartGrabbing()
+converter = pylon.ImageFormatConverter()
+converter.OutputPixelFormat = pylon.PixelType_RGB8packed
+converter.OutputBitAlignment = pylon.OutputBitAlignment_MsbAligned
+
+grabResult = camera.RetrieveResult(5000, pylon.TimeoutHandling_ThrowException)
+if grabResult.GrabSucceeded():
+    image = converter.Convert(grabResult)
+    img = image.GetArray()  # 可直接傳入 ROI 分析函式
+```
+
+👉 完整擷取後，可用 `segment_ring_roi()` 與 `get_ring_roi_from_contour()` 分析該影像，流程與靜態圖一致。
