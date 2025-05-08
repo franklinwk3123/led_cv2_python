@@ -38,6 +38,14 @@ def segment_ring_roi(gray_or_rgb, roi_mask, num_segments=72, channel=None):
     averages = [np.mean(s) if s else 0 for s in segment_values]
     return averages
 
+def compute_uniformity(brightness_list):
+    data = np.array(brightness_list)
+    E_min = np.min(data)
+    E_max = np.max(data)
+    E_avg = np.mean(data)
+    std_dev = np.std(data)
+    uniformity = E_min / E_max if E_max > 0 else 0
+    return uniformity, std_dev, E_min, E_avg, E_max
 
 def save_process_images(image, gray, mask, contour, roi_mask, folder_name):
     import os

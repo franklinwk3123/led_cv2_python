@@ -5,7 +5,12 @@ import numpy as np
 import pandas as pd
 import os
 from datetime import datetime
-from led_roi_utils import get_threshold_mask, get_largest_contour, get_ring_roi_from_contour, segment_ring_roi, save_process_images
+from led_roi_utils import get_threshold_mask, \
+                            get_largest_contour, \
+                            get_ring_roi_from_contour, \
+                            segment_ring_roi, \
+                            save_process_images, \
+                            compute_uniformity
 
 if len(sys.argv) != 2:
     print("Usage: python uniformity.py <image>")
@@ -18,11 +23,16 @@ mask = get_threshold_mask(gray)
 contour = get_largest_contour(mask)
 roi_mask = get_ring_roi_from_contour(contour, gray.shape, thickness=10)
 brightness = segment_ring_roi(gray, roi_mask, num_segments=72)
+uniformity, std_dev, E_min, E_avg, E_max = compute_uniformity(brightness)
 
 folder_name = f"led_result_{os.path.splitext(os.path.basename(image_path))[0]}_{datetime.now().strftime('%Y%m%d')}"
 save_process_images(image, gray, mask, contour, roi_mask, folder_name)
 
 df = pd.DataFrame({"Segment": list(range(1, 73)), "Brightness": brightness})
 df.to_csv(f"{folder_name}/uniformity.csv", index=False)
+
+print(df)
+print(f"Uniformity (U₀): {uniformity:.4f}")
+print(f"Standard Deviation: {std_dev:.2f}")
 
 print("Uniformity analysis done.")

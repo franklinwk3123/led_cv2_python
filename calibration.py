@@ -5,7 +5,11 @@ import numpy as np
 import pandas as pd
 import os
 from datetime import datetime
-from led_roi_utils import get_threshold_mask, get_largest_contour, get_ring_roi_from_contour, segment_ring_roi, save_process_images
+from led_roi_utils import get_threshold_mask, \
+                            get_largest_contour, \
+                            get_ring_roi_from_contour, \
+                            segment_ring_roi, \
+                            save_process_images
 
 if len(sys.argv) != 3:
     print("Usage: python calibration.py <golden_image> <dut_image>")
