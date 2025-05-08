@@ -3,8 +3,11 @@ import cv2
 import numpy as np
 from math import atan2, pi
 
-def get_threshold_mask(gray):
-    _, mask = cv2.threshold(gray, 250, 255, cv2.THRESH_BINARY)
+def get_threshold_mask(gray, use_otsu=True, thresh_val=0):
+    if use_otsu:
+        _, mask = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    else:
+        _, mask = cv2.threshold(gray, thresh_val, 255, cv2.THRESH_BINARY)
     return mask
 
 def get_largest_contour(mask):
