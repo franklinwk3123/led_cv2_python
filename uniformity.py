@@ -14,10 +14,19 @@ if len(sys.argv) != 2:
 image_path = sys.argv[1]
 image = cv2.imread(image_path)
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+# mask = roi.get_threshold_mask(gray, False, 250)
 mask = roi.get_threshold_mask(gray)
-contour = roi.get_largest_contour(mask)
-roi_mask = roi.get_ring_roi_from_contour(contour, gray.shape, thickness=10)
-brightness = roi.segment_ring_gray_roi(gray, roi_mask, num_segments=72)
+if mask is None:
+    print("No mask found. Please check the image.")
+    exit(1)
+
+use_thickness = False
+if use_thickness:
+    contour = roi.get_largest_contour(mask)
+    roi_mask = roi.get_ring_roi_from_contour(contour, gray.shape, thickness=30)
+    brightness = roi.segment_ring_gray_roi(gray, roi_mask, num_segments=72)
+else:
+    brightness = roi.segment_ring_gray_roi(gray, mask, num_segments=72)
 
 folder_name = f"led_result_{os.path.splitext(os.path.basename(image_path))[0]}_{datetime.now().strftime('%Y%m%d')}"
 roi.save_process_images(image, gray, mask, contour, roi_mask, folder_name)
