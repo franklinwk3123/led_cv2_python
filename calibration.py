@@ -19,13 +19,13 @@ assert golden_img.shape == dut_img.shape, "Golden 和 DUT 圖片必須具有相�
 gray_golden = cv2.cvtColor(golden_img, cv2.COLOR_BGR2GRAY)
 mask = roi.get_threshold_mask(gray_golden)
 contour = roi.get_largest_contour(mask)
-roi_mask = roi.get_ring_roi_from_contour(contour, gray_golden.shape, thickness=10)
+roi_mask = roi.get_ring_roi_from_contour(contour, gray_golden.shape, thickness=30)
 
 folder_name = f"led_result_{os.path.splitext(os.path.basename(sys.argv[2]))[0]}_{datetime.now().strftime('%Y%m%d')}"
 os.makedirs(folder_name, exist_ok=True)
 roi.save_process_images(golden_img, gray_golden, mask, contour, roi_mask, folder_name)
 
-rgb_names = ['R', 'G', 'B']
+rgb_names = ['B', 'G', 'R']
 result = []
 
 for c, name in enumerate(rgb_names):
